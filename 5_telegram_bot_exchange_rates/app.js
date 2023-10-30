@@ -3,9 +3,10 @@ import TelegramBot from 'node-telegram-bot-api';
 import NodeCache from 'node-cache';
 
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN.trim(), {polling: true});
+//start with a script "env $(cat .env | xargs) node app.js"
 const myCache = new NodeCache( { stdTTL: 300 } );
 
-bot.onText(/\/start/,  msg => {
+bot.onText(/\/start/,  msg => { //Creating a keyboard with currencies
     const chatId = msg.chat.id;
     bot.sendMessage(chatId, "Choose currency to see the exchange rate.", {
         reply_markup: {
@@ -16,11 +17,11 @@ bot.onText(/\/start/,  msg => {
     })
 })
 
+//Sending messages with exchange rates
 bot.on("message", async msg => {
     const chatId = msg.chat.id;
     let PrivatRates = await getPrivatRate();
     let MonoRates = await getMonoRate();
-    // console.log(MonoRates);
     if (msg.text === "USD") {
         await bot.sendMessage(chatId, `
 There is exchange rate for USD in Privatbank:
@@ -42,13 +43,13 @@ Sale rate: ${MonoRates[1].rateSell} UAH
     }
 })
 
+//Returning exchange rates data of monobank, caches data if another API request is not allowed
 async function getMonoRate() {
     if (myCache.has("USDrate") && myCache.has("EURrate")) {
         const data = [
             myCache.get("USDrate"),
             myCache.get("EURrate")
         ]
-        console.log("cache");
         return data;
     } else {
         const res = await axios.get("https://api.monobank.ua/bank/currency");
@@ -60,11 +61,11 @@ async function getMonoRate() {
             {key: "USDrate", val: filteredRates[0], ttl: 300},
             {key: "EURrate", val: filteredRates[1], ttl: 300}
         ]);
-        console.log("api");
         return await filteredRates;
     }
 }
 
+//Returning exchange rates data of privatbank
 async function getPrivatRate() {
     const res = await axios.get("https://api.privatbank.ua/p24api/pubinfo?exchange&coursid=11");
     return res.data;

@@ -1,5 +1,7 @@
 import fs from "fs"
 
+
+// Returning data form a txt file as JSON. Creates txt file if not exists
 function GetJSON() {
     try {
         const data = fs.readFileSync("./database.txt", 'utf-8');
@@ -14,6 +16,8 @@ function GetJSON() {
     }
 }
 
+
+//Adding user to a txt file
 export function CreateUser(data) {
     const users = GetJSON();
     users.push(data);
@@ -22,6 +26,7 @@ export function CreateUser(data) {
 
 }
 
+//Searching for a users and informs about results
 export function FindUser(username) {
     const AllUsers = GetJSON();
     let users = [] 
